@@ -9,6 +9,8 @@ import com.suraj.healthcare.doctor_service.repository.DoctorRepository;
 import com.suraj.healthcare.doctor_service.service.AvailabilitySlotService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -45,6 +47,7 @@ public class AvailabilitySlotServiceImpl implements AvailabilitySlotService {
 	}
 
 	@Override
+	@Cacheable(value = "availabilitySlots", key = "#doctorId")
 	public List<AvailabilitySlotDto> getSlotsByDoctorId(Long doctorId) {
 		Doctor doctor = getDoctorById(doctorId);
 

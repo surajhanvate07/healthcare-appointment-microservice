@@ -1,5 +1,6 @@
 package com.suraj.healthcare.user_service.dto;
 
+import com.suraj.healthcare.user_service.annotations.PasswordStrength;
 import com.suraj.healthcare.user_service.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -22,6 +23,7 @@ public class SignUpRequestDto {
 	private String email;
 
 	@NotBlank(message = "Password is required")
+	@PasswordStrength
 	private String password;
 
 	@NotNull(message = "Role is required")

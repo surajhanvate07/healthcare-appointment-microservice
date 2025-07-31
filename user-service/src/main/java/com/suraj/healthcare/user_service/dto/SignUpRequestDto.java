@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,6 +27,11 @@ public class SignUpRequestDto {
 	@NotBlank(message = "Password is required")
 	@PasswordStrength
 	private String password;
+
+	@NotBlank(message = "Phone number is required")
+	private String phone;
+
+	private LocalDate dob;
 
 	@NotNull(message = "Role is required")
 	private Role role;

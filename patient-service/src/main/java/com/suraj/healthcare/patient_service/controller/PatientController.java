@@ -1,0 +1,40 @@
+package com.suraj.healthcare.patient_service.controller;
+
+import com.suraj.healthcare.patient_service.dto.CreatePatientRequestDto;
+import com.suraj.healthcare.patient_service.dto.PatientDto;
+import com.suraj.healthcare.patient_service.service.PatientService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/patients")
+public class PatientController {
+
+	@Autowired
+	private PatientService patientService;
+
+	@PostMapping("/create")
+	public ResponseEntity<PatientDto> create(@Valid @RequestBody CreatePatientRequestDto dto) {
+		return ResponseEntity.ok(patientService.createPatient(dto));
+	}
+
+	@GetMapping("/all")
+	public ResponseEntity<List<PatientDto>> getAll() {
+		return ResponseEntity.ok(patientService.getAllPatients());
+	}
+
+	@GetMapping("/get/{id}")
+	public ResponseEntity<PatientDto> getById(@PathVariable Long id) {
+		return ResponseEntity.ok(patientService.getPatientById(id));
+	}
+
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		patientService.deletePatient(id);
+		return ResponseEntity.noContent().build();
+	}
+}

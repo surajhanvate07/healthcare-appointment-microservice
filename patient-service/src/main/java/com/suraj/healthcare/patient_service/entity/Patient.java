@@ -1,6 +1,5 @@
-package com.suraj.healthcare.user_service.entity;
+package com.suraj.healthcare.patient_service.entity;
 
-import com.suraj.healthcare.user_service.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,22 +9,19 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "users")
+@Table(name = "patients")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class Patient {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String name;
 	private String email;
-	private String password;
-	private String phone;
+	private String phoneNumber;
+	private String address;
 	private LocalDate dob;
-
-	@Enumerated(EnumType.STRING)
-	private Role role;
 }

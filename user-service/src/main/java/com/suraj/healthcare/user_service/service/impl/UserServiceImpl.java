@@ -1,9 +1,12 @@
 package com.suraj.healthcare.user_service.service.impl;
 
+import com.suraj.healthcare.user_service.client.PatientClient;
+import com.suraj.healthcare.user_service.dto.CreatePatientRequestDto;
 import com.suraj.healthcare.user_service.dto.LoginRequestDto;
 import com.suraj.healthcare.user_service.dto.SignUpRequestDto;
 import com.suraj.healthcare.user_service.dto.UserDto;
 import com.suraj.healthcare.user_service.entity.User;
+import com.suraj.healthcare.user_service.enums.Role;
 import com.suraj.healthcare.user_service.exception.AlreadyExistsException;
 import com.suraj.healthcare.user_service.exception.UserNotExistsException;
 import com.suraj.healthcare.user_service.repository.UserRepository;
@@ -11,6 +14,7 @@ import com.suraj.healthcare.user_service.response.LoginResponse;
 import com.suraj.healthcare.user_service.service.UserService;
 import com.suraj.healthcare.user_service.util.JwtUtil;
 import com.suraj.healthcare.user_service.util.PasswordUtil;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -24,6 +28,19 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
 	private final JwtUtil jwtUtil;
+	private final PatientClient patientClient;
+
+	@Retry(name = "patientServiceRetry", fallbackMethod = "handlePatientServiceFailure")
+	public void registerPatient(CreatePatientRequestDto dto) {
+		patientClient.createPatient(dto);  // Feign client call
+	}
+
+	private void handlePatientServiceFailure(CreatePatientRequestDto dto, Exception ex) {
+		// Log failure, persist to outbox, or raise alert
+		log.error("Failed to create patient in PatientService. Will retry later. Reason: {}", ex.getMessage());
+		// Optional: Save failed event to DB or queue
+	}
+
 
 	@Override
 	public UserDto registerUser(SignUpRequestDto signUpRequestDto) {
@@ -41,6 +58,20 @@ public class UserServiceImpl implements UserService {
 		try {
 			User savedUser = userRepository.save(user);
 			log.info("User registered successfully with ID: {}", savedUser.getId());
+
+			if (savedUser.getRole() == Role.PATIENT) {
+				log.info("Creating patient profile for user with ID: {}", savedUser.getId());
+				// Assuming a PatientClient is available to create a patient profile
+				CreatePatientRequestDto createPatientRequestDto = CreatePatientRequestDto.builder()
+						.name(savedUser.getName())
+						.email(savedUser.getEmail())
+						.phone(savedUser.getPhone())
+						.dob(savedUser.getDob())
+						.build();
+
+				registerPatient(createPatientRequestDto);
+
+			}
 			return modelMapper.map(savedUser, UserDto.class);
 		} catch (Exception e) {
 			log.error("Error occurred while saving user: {}", e.getMessage());

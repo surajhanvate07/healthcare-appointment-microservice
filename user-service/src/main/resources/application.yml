@@ -26,6 +26,12 @@ jwt:
   secret: 8f7A@k92!ZbC#m4vXqP*1LsW0dE^gTnY
   expiration: 3600000
 
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
 resilience4j:
   retry:
     instances:

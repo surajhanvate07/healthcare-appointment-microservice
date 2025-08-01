@@ -10,6 +10,7 @@ import com.suraj.healthcare.doctor_service.repository.DoctorRepository;
 import com.suraj.healthcare.doctor_service.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -107,6 +108,7 @@ public class DoctorServiceImpl implements DoctorService {
 	}
 
 	@Override
+	@CacheEvict(value = "availabilitySlots", key = "#id")
 	public void deleteDoctor(Long id) {
 		Doctor doctor = doctorRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Doctor not found with id: " + id));

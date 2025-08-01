@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/v1/user-service/**
+          filters:
+            - StripPrefix=2
+            - name: UsersLoggingFilter
+
+        - id: doctor-service
+          uri: lb://DOCTOR-SERVICE
+          predicates:
+            - Path=/api/v1/doctor-service/**
+          filters:
+            - StripPrefix=2
+            - name: DoctorsLoggingFilter
+
+        - id: patient-service
+          uri: lb://PATIENT-SERVICE
+          predicates:
+            - Path=/api/v1/patient-service/**
+          filters:
+            - StripPrefix=2
+            - name: PatientsLoggingFilter
+
+
+jwt:
+  secret: 8f7A@k92!ZbC#m4vXqP*1LsW0dE^gTnY
+  expiration: 3600000

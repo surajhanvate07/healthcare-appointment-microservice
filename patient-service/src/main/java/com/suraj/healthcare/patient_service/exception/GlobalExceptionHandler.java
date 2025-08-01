@@ -37,6 +37,17 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.badRequest().body(response);
 	}
 
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<ApiExceptionResponse> handleAccessDeniedException(AccessDeniedException ex) {
+		ApiExceptionResponse response = ApiExceptionResponse.builder()
+				.timestamp(LocalDateTime.now())
+				.status(HttpStatus.FORBIDDEN.value())
+				.error(HttpStatus.FORBIDDEN.getReasonPhrase())
+				.message(ex.getLocalizedMessage())
+				.build();
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = new HashMap<>();

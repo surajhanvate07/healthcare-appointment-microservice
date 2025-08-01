@@ -3,6 +3,7 @@ package com.suraj.healthcare.patient_service.controller;
 import com.suraj.healthcare.patient_service.dto.CreatePatientRequestDto;
 import com.suraj.healthcare.patient_service.dto.PatientDto;
 import com.suraj.healthcare.patient_service.dto.UpdatePatientDto;
+import com.suraj.healthcare.patient_service.exception.AccessDeniedException;
 import com.suraj.healthcare.patient_service.service.PatientService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,10 @@ public class PatientController {
 	}
 
 	@GetMapping("/all")
-	public ResponseEntity<List<PatientDto>> getAll() {
+	public ResponseEntity<List<PatientDto>> getAll(@RequestHeader("X-User-Role") String requesterRole) {
+		if (!requesterRole.equals("ADMIN")) {
+			throw new AccessDeniedException("Access denied: Only ADMIN can view all patients");
+		}
 		return ResponseEntity.ok(patientService.getAllPatients());
 	}
 

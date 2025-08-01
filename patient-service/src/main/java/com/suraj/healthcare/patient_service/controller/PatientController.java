@@ -2,6 +2,7 @@ package com.suraj.healthcare.patient_service.controller;
 
 import com.suraj.healthcare.patient_service.dto.CreatePatientRequestDto;
 import com.suraj.healthcare.patient_service.dto.PatientDto;
+import com.suraj.healthcare.patient_service.dto.UpdatePatientDto;
 import com.suraj.healthcare.patient_service.service.PatientService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,11 @@ public class PatientController {
 	@GetMapping("/get/{id}")
 	public ResponseEntity<PatientDto> getById(@PathVariable Long id) {
 		return ResponseEntity.ok(patientService.getPatientById(id));
+	}
+
+	@PutMapping("/update/{id}")
+	public ResponseEntity<PatientDto> update(@PathVariable Long id, @Valid @RequestBody UpdatePatientDto updatePatientDto) {
+		return ResponseEntity.ok(patientService.updatePatient(id, updatePatientDto));
 	}
 
 	@DeleteMapping("/delete/{id}")

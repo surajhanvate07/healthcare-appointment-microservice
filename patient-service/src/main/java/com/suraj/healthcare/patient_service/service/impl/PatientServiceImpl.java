@@ -2,6 +2,7 @@ package com.suraj.healthcare.patient_service.service.impl;
 
 import com.suraj.healthcare.patient_service.dto.CreatePatientRequestDto;
 import com.suraj.healthcare.patient_service.dto.PatientDto;
+import com.suraj.healthcare.patient_service.dto.UpdatePatientDto;
 import com.suraj.healthcare.patient_service.entity.Patient;
 import com.suraj.healthcare.patient_service.exception.AlreadyExistsException;
 import com.suraj.healthcare.patient_service.exception.ResourceNotFoundException;
@@ -57,6 +58,28 @@ public class PatientServiceImpl implements PatientService {
 				.orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
 
 		return modelMapper.map(patient, PatientDto.class);
+	}
+
+	@Override
+	public PatientDto updatePatient(Long id, UpdatePatientDto updatePatientRequestDto) {
+		if (id == null || updatePatientRequestDto == null) {
+			throw new IllegalArgumentException("Patient ID and UpdatePatientDto cannot be null");
+		}
+		Patient existingPatient = patientRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
+
+		if (updatePatientRequestDto.getName() != null && !updatePatientRequestDto.getName().isBlank()) {
+			existingPatient.setName(updatePatientRequestDto.getName());
+		}
+		if (updatePatientRequestDto.getAddress() != null && !updatePatientRequestDto.getAddress().isBlank()) {
+			existingPatient.setAddress(updatePatientRequestDto.getAddress());
+		}
+		if (updatePatientRequestDto.getDob() != null && !updatePatientRequestDto.getDob().isAfter(java.time.LocalDate.now())) {
+			existingPatient.setDob(updatePatientRequestDto.getDob());
+		}
+
+		Patient savedPatient = patientRepository.save(existingPatient);
+		return modelMapper.map(savedPatient, PatientDto.class);
 	}
 
 	@Override

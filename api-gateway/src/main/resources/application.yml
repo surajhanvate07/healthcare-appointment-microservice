@@ -23,6 +23,7 @@ spring:
           filters:
             - StripPrefix=2
             - name: DoctorsLoggingFilter
+            - name: AuthenticationFilter
 
         - id: patient-service
           uri: lb://PATIENT-SERVICE
@@ -31,7 +32,16 @@ spring:
           filters:
             - StripPrefix=2
             - name: PatientsLoggingFilter
+            - name: AuthenticationFilter
 
+auth:
+  roleAccess:
+    ADMIN:
+      - "/"
+    PATIENT:
+      - "/patient-service"
+    DOCTOR:
+      - "/doctor-service"
 
 jwt:
   secret: 8f7A@k92!ZbC#m4vXqP*1LsW0dE^gTnY

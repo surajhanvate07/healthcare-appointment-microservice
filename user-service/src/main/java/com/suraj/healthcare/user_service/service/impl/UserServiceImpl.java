@@ -67,6 +67,7 @@ public class UserServiceImpl implements UserService {
 						.email(savedUser.getEmail())
 						.phone(savedUser.getPhone())
 						.dob(savedUser.getDob())
+						.internalRequest(true)
 						.build();
 
 				registerPatient(createPatientRequestDto);

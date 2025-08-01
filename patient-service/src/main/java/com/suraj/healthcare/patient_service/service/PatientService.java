@@ -12,7 +12,7 @@ public interface PatientService {
 
 	List<PatientDto> getAllPatients();
 
-	PatientDto getPatientById(Long id, String requesterEmail, String requesterRole);
+	PatientDto getPatientById(Long id);
 
 	PatientDto updatePatient(Long id, UpdatePatientDto updatePatientRequestDto);
 

@@ -1,5 +1,6 @@
 package com.suraj.healthcare.patient_service.service.impl;
 
+import com.suraj.healthcare.patient_service.context.UserContextHolder;
 import com.suraj.healthcare.patient_service.dto.CreatePatientRequestDto;
 import com.suraj.healthcare.patient_service.dto.PatientDto;
 import com.suraj.healthcare.patient_service.dto.UpdatePatientDto;
@@ -50,7 +51,7 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
-	public PatientDto getPatientById(Long id, String requesterEmail, String requesterRole) {
+	public PatientDto getPatientById(Long id) {
 		if (id == null) {
 			throw new IllegalArgumentException("Patient ID cannot be null");
 		}
@@ -58,9 +59,7 @@ public class PatientServiceImpl implements PatientService {
 		Patient patient = patientRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
 
-		if (requesterRole != null && requesterRole.equals("PATIENT") && !patient.getEmail().equals(requesterEmail)) {
-			throw new AccessDeniedException("Access denied: You can only view your own patient details");
-		}
+		checkRoleAccess(patient);
 
 		return modelMapper.map(patient, PatientDto.class);
 	}
@@ -72,6 +71,8 @@ public class PatientServiceImpl implements PatientService {
 		}
 		Patient existingPatient = patientRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
+
+		checkRoleAccess(existingPatient);
 
 		if (updatePatientRequestDto.getName() != null && !updatePatientRequestDto.getName().isBlank()) {
 			existingPatient.setName(updatePatientRequestDto.getName());
@@ -93,9 +94,10 @@ public class PatientServiceImpl implements PatientService {
 			throw new IllegalArgumentException("Patient ID cannot be null");
 		}
 
-		if (!patientRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Patient not found with id: " + id);
-		}
+		Patient existingPatient = patientRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
+
+		checkRoleAccess(existingPatient);
 
 		patientRepository.deleteById(id);
 
@@ -103,5 +105,15 @@ public class PatientServiceImpl implements PatientService {
 
 	private boolean isPatientAlreadyExists(String email) {
 		return patientRepository.existsByEmail(email);
+	}
+
+	private void checkRoleAccess(Patient existingPatient) {
+		// Get the current user's role and email from UserContextHolder
+		String requesterRole = UserContextHolder.getCurrentUser().role();
+		String requesterEmail = UserContextHolder.getCurrentUser().email();
+
+		if (requesterRole != null && requesterRole.equals("PATIENT") && !existingPatient.getEmail().equals(requesterEmail)) {
+			throw new AccessDeniedException("Access denied: You can only update your own patient details");
+		}
 	}
 }

@@ -29,4 +29,6 @@ public class CreatePatientRequestDto {
 	private String phone;
 
 	private LocalDate dob;
+
+	private Boolean internalRequest;
 }

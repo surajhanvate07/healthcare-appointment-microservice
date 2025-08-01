@@ -1,5 +1,6 @@
 package com.suraj.healthcare.patient_service.controller;
 
+import com.suraj.healthcare.patient_service.context.UserContextHolder;
 import com.suraj.healthcare.patient_service.dto.CreatePatientRequestDto;
 import com.suraj.healthcare.patient_service.dto.PatientDto;
 import com.suraj.healthcare.patient_service.dto.UpdatePatientDto;
@@ -21,11 +22,26 @@ public class PatientController {
 
 	@PostMapping("/create")
 	public ResponseEntity<PatientDto> create(@Valid @RequestBody CreatePatientRequestDto dto) {
+		// If not an internal request, enforce role check
+		if(!Boolean.TRUE.equals(dto.getInternalRequest())) {
+			var user = UserContextHolder.getCurrentUser();
+
+			if (user == null) {
+				throw new AccessDeniedException("Access denied: Missing user context");
+			}
+			String requesterRole = user.role();
+
+			if (!requesterRole.equals("ADMIN") && !requesterRole.equals("DOCTOR")) {
+				throw new AccessDeniedException("Access denied: Only ADMIN / DOCTOR can create patients");
+			}
+		}
 		return ResponseEntity.ok(patientService.createPatient(dto));
 	}
 
 	@GetMapping("/all")
-	public ResponseEntity<List<PatientDto>> getAll(@RequestHeader("X-User-Role") String requesterRole) {
+	public ResponseEntity<List<PatientDto>> getAll() {
+		String requesterRole = UserContextHolder.getCurrentUser().role();
+
 		if (!requesterRole.equals("ADMIN")) {
 			throw new AccessDeniedException("Access denied: Only ADMIN can view all patients");
 		}
@@ -33,9 +49,8 @@ public class PatientController {
 	}
 
 	@GetMapping("/get/{id}")
-	public ResponseEntity<PatientDto> getById(@PathVariable Long id, @RequestHeader("X-User-Email") String requesterEmail,
-											  @RequestHeader("X-User-Role") String requesterRole) {
-		return ResponseEntity.ok(patientService.getPatientById(id, requesterEmail, requesterRole));
+	public ResponseEntity<PatientDto> getById(@PathVariable Long id) {
+		return ResponseEntity.ok(patientService.getPatientById(id));
 	}
 
 	@PutMapping("/update/{id}")

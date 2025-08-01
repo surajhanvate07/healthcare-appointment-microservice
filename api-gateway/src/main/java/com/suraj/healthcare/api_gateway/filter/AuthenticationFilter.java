@@ -40,7 +40,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
 				log.warn("Invalid or missing Authorization header");
 				exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-				return exchange.getResponse().setComplete();
+				return unauthorized(exchange.getResponse(), "Missing or invalid Authorization header");
 			}
 
 			String jwtToken = authorizationHeader.substring(7);

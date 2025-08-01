@@ -33,8 +33,9 @@ public class PatientController {
 	}
 
 	@GetMapping("/get/{id}")
-	public ResponseEntity<PatientDto> getById(@PathVariable Long id) {
-		return ResponseEntity.ok(patientService.getPatientById(id));
+	public ResponseEntity<PatientDto> getById(@PathVariable Long id, @RequestHeader("X-User-Email") String requesterEmail,
+											  @RequestHeader("X-User-Role") String requesterRole) {
+		return ResponseEntity.ok(patientService.getPatientById(id, requesterEmail, requesterRole));
 	}
 
 	@PutMapping("/update/{id}")

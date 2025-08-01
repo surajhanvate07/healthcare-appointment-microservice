@@ -4,6 +4,7 @@ import com.suraj.healthcare.patient_service.dto.CreatePatientRequestDto;
 import com.suraj.healthcare.patient_service.dto.PatientDto;
 import com.suraj.healthcare.patient_service.dto.UpdatePatientDto;
 import com.suraj.healthcare.patient_service.entity.Patient;
+import com.suraj.healthcare.patient_service.exception.AccessDeniedException;
 import com.suraj.healthcare.patient_service.exception.AlreadyExistsException;
 import com.suraj.healthcare.patient_service.exception.ResourceNotFoundException;
 import com.suraj.healthcare.patient_service.repository.PatientRepository;
@@ -49,13 +50,17 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
-	public PatientDto getPatientById(Long id) {
+	public PatientDto getPatientById(Long id, String requesterEmail, String requesterRole) {
 		if (id == null) {
 			throw new IllegalArgumentException("Patient ID cannot be null");
 		}
 
 		Patient patient = patientRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
+
+		if (requesterRole != null && requesterRole.equals("PATIENT") && !patient.getEmail().equals(requesterEmail)) {
+			throw new AccessDeniedException("Access denied: You can only view your own patient details");
+		}
 
 		return modelMapper.map(patient, PatientDto.class);
 	}

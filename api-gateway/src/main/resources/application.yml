@@ -34,14 +34,26 @@ spring:
             - name: PatientsLoggingFilter
             - name: AuthenticationFilter
 
+        - id: appointment-service
+          uri: lb://APPOINTMENT-SERVICE
+          predicates:
+            - Path=/api/v1/appointment-service/**
+          filters:
+            - StripPrefix=2
+            - name: AppointmentsLoggingFilter
+            - name: AuthenticationFilter
+
 auth:
   roleAccess:
     ADMIN:
       - "/"
     PATIENT:
       - "/patient-service"
+      - "/appointment-service/appointments/book"
+      - "/appointment-service/appointments/patient"
     DOCTOR:
       - "/doctor-service"
+      - "/appointment-service/appointment/doctor"
 
 jwt:
   secret: 8f7A@k92!ZbC#m4vXqP*1LsW0dE^gTnY

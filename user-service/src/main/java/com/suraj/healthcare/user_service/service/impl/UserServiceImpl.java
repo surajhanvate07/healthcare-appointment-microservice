@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
 		}
 		log.info("User logged in successfully with email: {}", loginRequestDto.getEmail());
 
-		String token = jwtUtil.generateAccessToken(user.getEmail(), user.getRole().name());
+		String token = jwtUtil.generateAccessToken(user.getEmail(), user.getRole().name(), user.getId());
 		return new LoginResponse(token);
 	}
 }

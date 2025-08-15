@@ -41,4 +41,14 @@ public class JwtService {
 
 		return claims.get("role", String.class);
 	}
+
+	public Long extractUserId(String token) {
+		Claims claims = Jwts.parser()
+				.verifyWith(getSecretKey())
+				.build()
+				.parseSignedClaims(token)
+				.getPayload();
+
+		return claims.get("id", Long.class);
+	}
 }

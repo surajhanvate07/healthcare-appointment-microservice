@@ -23,10 +23,11 @@ public class JwtUtil {
 		return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public String generateAccessToken(String email, String role) {
+	public String generateAccessToken(String email, String role, Long id) {
 		return Jwts.builder()
 				.subject(email)
 				.claim("role", role)
+				.claim("id", id)
 				.issuedAt(new Date())
 				.expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
 				.signWith(getSecretKey())

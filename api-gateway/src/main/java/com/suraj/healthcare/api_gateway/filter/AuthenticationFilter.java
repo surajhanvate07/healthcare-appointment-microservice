@@ -46,9 +46,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			String jwtToken = authorizationHeader.substring(7);
 			String userEmailId = null;
 			String userRole = null;
+			Long userId = null;
 			try {
 				userEmailId = jwtService.extractUserEmailId(jwtToken);
 				userRole = jwtService.extractUserRole(jwtToken);
+				userId = jwtService.extractUserId(jwtToken);
 			} catch (JwtException | IllegalArgumentException e) {
 				return unauthorized(exchange.getResponse(), "Invalid JWT token");
 			}
@@ -59,6 +61,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
 			log.info("Extracted user email ID: {}", userEmailId);
 			log.info("Extracted user role: {}", userRole);
+			log.info("Extracted user ID: {}", userId);
 
 			String path = exchange.getRequest().getURI().getPath();
 
@@ -72,6 +75,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 					.request(exchange.getRequest().mutate()
 							.header("X-User-Email", userEmailId)
 							.header("X-User-Role", userRole)
+							.header("X-User-Id", String.valueOf(userId))
 							.build())
 					.build();
 

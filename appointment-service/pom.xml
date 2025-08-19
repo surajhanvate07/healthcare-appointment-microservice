@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.suraj.healthcare</groupId>
-	<artifactId>appointment_service</artifactId>
+	<artifactId>appointment-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>appointment_service</name>
 	<description>Appointment Service for Healthcare</description>

@@ -42,15 +42,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 			throw new ResourceNotFoundException("Doctor not found with ID: " + request.getDoctorId());
 		}
 
-		List<AvailabilitySlotDto> slotDtoList;
-		try {
-			slotDtoList = doctorAvailabilityService.getSlotsByDoctorId(doctor.getId());
-		} catch (FeignException ex) {
-			log.error("Error fetching availability slots for doctor ID {}: {}", doctor.getId(), ex.getMessage());
-			throw new ServiceUnavailableException("Doctor's availability service is currently unavailable");
-		}
+		List<AvailabilitySlotDto> slotDtoList = fetchAvailableSlotsOfDoctor(doctor.getId());
 
-		if (slotDtoList.isEmpty()) {
+		if (slotDtoList == null || slotDtoList.isEmpty()) {
 			throw new ResourceNotFoundException("No availability slots found for doctor ID: " + doctor.getId());
 		}
 
@@ -104,6 +98,18 @@ public class AppointmentServiceImpl implements AppointmentService {
 		Appointment appointment = appointmentRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + id));
 		authorizePatientOrAdmin(appointment.getPatientId());
+
+		List<AvailabilitySlotDto> slotDtoList = fetchAvailableSlotsOfDoctor(appointment.getDoctorId());
+
+		if (slotDtoList == null || slotDtoList.isEmpty() ||
+				slotDtoList.stream().noneMatch(slot ->
+						slot.getDate().equals(request.getNewAppointmentDateTime().toLocalDate()) &&
+								!request.getNewAppointmentDateTime().toLocalTime().isBefore(slot.getStartTime()) &&
+								request.getNewAppointmentDateTime().toLocalTime().isBefore(slot.getEndTime())
+				)) {
+			throw new ResourceNotFoundException("No availability slots found for doctor ID: " + appointment.getDoctorId());
+		}
+
 		appointment.setAppointmentDateTime(request.getNewAppointmentDateTime());
 		appointment.setStatus(RESCHEDULED);
 		if (request.getRemarks() != null) {
@@ -129,5 +135,17 @@ public class AppointmentServiceImpl implements AppointmentService {
 				(role.equals("PATIENT") && !id.equals(patientId))) {
 			throw new AccessDeniedException("Access denied, you are not authorized to access this resource");
 		}
+	}
+
+	private List<AvailabilitySlotDto> fetchAvailableSlotsOfDoctor(Long doctorId) {
+		List<AvailabilitySlotDto> slotDtoList;
+		try {
+			slotDtoList = doctorAvailabilityService.getSlotsByDoctorId(doctorId);
+		} catch (FeignException ex) {
+			log.error("Error fetching availability slots for doctor ID {}: {}", doctorId, ex.getMessage());
+			throw new ServiceUnavailableException("Doctor's availability service is currently unavailable");
+		}
+
+		return slotDtoList;
 	}
 }

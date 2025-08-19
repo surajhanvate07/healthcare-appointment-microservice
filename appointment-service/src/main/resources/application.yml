@@ -7,6 +7,9 @@ spring:
   application:
     name: appointment-service
 
+  main:
+    allow-bean-definition-overriding: true
+
   datasource:
     url: jdbc:mysql://localhost:3306/healthcareAppointment
     username: root
@@ -36,6 +39,6 @@ resilience4j:
         waitDurationInOpenState: 10s
   retry:
     instances:
-      doctorsService:
+      availabilitySlotsService:
         maxAttempts: 3
         waitDuration: 3s
